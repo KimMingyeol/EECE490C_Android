@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/DetailInfoLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/PostDetailsTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Details"
+            android:paddingLeft="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="20dp"
+            android:textStyle="bold"
+            android:textSize="30dp" />
+
+        <ImageView
+            android:id="@+id/PhotoView"
+            android:layout_width="match_parent"
+            android:layout_height="1000px"
+            android:padding="10dp"
+            tools:srcCompat="@tools:sample/avatars" />
+
+        <LinearLayout
+            android:id="@+id/PostDetailsInfo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="10dp">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
+
+                    <TextView
+                        android:id="@+id/UploaderLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Uploader   "
+                        android:textStyle="bold"
+                        android:textSize="20dp" />
+
+                    <TextView
+                        android:id="@+id/Uploader"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
+
+                    <TextView
+                        android:id="@+id/DateTimeLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="DateTime   "
+                        android:textStyle="bold"
+                        android:textSize="20dp" />
+
+                    <TextView
+                        android:id="@+id/DateTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
+
+                    <TextView
+                        android:id="@+id/CaptionLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Caption   "
+                        android:textStyle = "bold"
+                        android:textSize="20dp" />
+
+                    <TextView
+                        android:id="@+id/Caption"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </TableRow>
+
+            </TableLayout>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

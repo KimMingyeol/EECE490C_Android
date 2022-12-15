@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:ignore="MissingConstraints">
+
+        <TextView
+            android:id="@+id/AppTitleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Virtual Gallery"
+            android:textSize = "30dp"
+            android:textStyle= "bold"
+            android:paddingLeft="10dp"/>
+
+        <LinearLayout
+            android:id="@+id/UserInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="6dp">
+
+            <TextView
+                android:id="@+id/UsernameInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize = "20dp"
+                android:paddingLeft="10dp"
+                android:text="username: " />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="12dp">
+
+            <TextView
+                android:id="@+id/UploadText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="UPLOAD FROM"
+                android:textSize="16dp"
+                android:textStyle="bold"
+                android:layout_marginLeft="10dp"/>
+
+            <LinearLayout
+                android:id="@+id/ActionSetLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="5dp">
+
+                <Button
+                    android:id="@+id/FromGalleryButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="1"
+                    android:text="Gallery"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/black" />
+
+                <Button
+                    android:id="@+id/FromCameraButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="1"
+                    android:text="camera"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/black" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/GallerySwipeLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <GridView
+                android:id="@+id/GalleryView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:numColumns="2"
+                android:gravity="center"
+                android:padding="5dp"
+                android:verticalSpacing="5dp"
+                android:stretchMode="columnWidth"/>
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
