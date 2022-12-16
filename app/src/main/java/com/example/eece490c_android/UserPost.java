@@ -5,29 +5,29 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
 public class UserPost {
     private int id;
     private String username;
+    private String artist;
     private String photoURL;
     private String uploadDateFormatted;
     private String uploadTimeFormatted;
-    private ArrayList<String> namesOfHeartUsers;
+    private String caption;
     private File localPhotoFile;
 
-    public UserPost(String username, int id, String photoURL, String uploadDateFormatted, String uploadTimeFormatted, ArrayList<String> namesOfHeartUsers) {
-        this.username = username;
+    public UserPost(int id, String username, String artist , String photoURL, String uploadDateFormatted, String uploadTimeFormatted, String caption) {
         this.id = id;
+        this.username = username;
+        this.artist = artist;
         this.photoURL = photoURL;
         this.uploadDateFormatted = uploadDateFormatted;
         this.uploadTimeFormatted = uploadTimeFormatted;
-        this.namesOfHeartUsers = namesOfHeartUsers;
+        this.caption = caption;
         this.localPhotoFile = null;
     }
 
@@ -61,12 +61,16 @@ public class UserPost {
         }).start();
     }
 
+    public int getId() {
+        return id;
+    }
+
     public String getUsername() {
         return username;
     }
 
-    public int getId() {
-        return id;
+    public String getArtist() {
+        return artist;
     }
 
     public String getPhotoURL() {
@@ -81,8 +85,8 @@ public class UserPost {
         return uploadTimeFormatted;
     }
 
-    public ArrayList<String> getNamesOfHeartUsers() {
-        return namesOfHeartUsers;
+    public String getCaption() {
+        return caption;
     }
 
     public File getLocalPhotoFile() {

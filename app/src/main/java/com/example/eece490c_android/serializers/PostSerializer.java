@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class PostSerializer {
     private int id;
-    private ArrayList<UserSerializer> heart_users;
+    private String artist;
     private String photo;
     private int captured_year;
     private int captured_month;
@@ -21,6 +21,10 @@ public class PostSerializer {
         return id;
     }
 
+    public String getArtist() {
+        return artist;
+    }
+
     public String getDate() {
         return String.format("%d-%d-%d", captured_year, captured_month, captured_day);
     }
@@ -31,14 +35,6 @@ public class PostSerializer {
 
     public String getCaption() {
         return caption;
-    }
-
-    public ArrayList<String> getNamesOfHeartUsers() {
-        ArrayList<String> namesOfHeartUsers = new ArrayList<String>();
-        for (UserSerializer userSerializer : heart_users) {
-            namesOfHeartUsers.add(userSerializer.getUsername());
-        }
-        return namesOfHeartUsers;
     }
 
     public String getPhoto() {

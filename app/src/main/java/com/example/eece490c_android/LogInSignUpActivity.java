@@ -40,7 +40,7 @@ public class LogInSignUpActivity extends AppCompatActivity {
         usernameInput = findViewById(R.id.UsernameInput);
         passwordInput = findViewById(R.id.PasswordInput);
 
-        requestServerURL = "https://3d76-2001-2d8-642d-b3f2-54a-e5ff-713d-a249.ngrok.io/";
+        requestServerURL = "https://27d4-141-223-65-49.ngrok.io/";
         Retrofit retrofit = new Retrofit.Builder().baseUrl(requestServerURL).addConverterFactory(GsonConverterFactory.create()).build();
         serverAPI = retrofit.create(ServerAPI.class);
 
@@ -78,7 +78,7 @@ public class LogInSignUpActivity extends AppCompatActivity {
 
                     startActivity(intentToGallery);
                 } else {
-
+                    Toast.makeText(LogInSignUpActivity.this, "Log In Failed!", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -99,9 +99,15 @@ public class LogInSignUpActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<SignUpSerializer> call, Response<SignUpSerializer> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(LogInSignUpActivity.this, "Your account has been successfully registered!", Toast.LENGTH_LONG);
+                    usernameInput.setText("");
+                    passwordInput.setText("");
+                    Toast.makeText(LogInSignUpActivity.this, "Account Successfully Registered!", Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(LogInSignUpActivity.this, "Sign Up Error!", Toast.LENGTH_SHORT);
+                    if (response.code() == 409) {
+                        Toast.makeText(LogInSignUpActivity.this, "Account Already Exists!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(LogInSignUpActivity.this, "Invalid Sign Up Request!", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
 

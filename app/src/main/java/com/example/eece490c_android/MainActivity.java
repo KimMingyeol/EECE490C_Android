@@ -22,6 +22,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.eece490c_android.serializers.FetchPostsSerializer;
@@ -30,6 +31,8 @@ import com.example.eece490c_android.serializers.UploadPostSerializer;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -41,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
     private GridView galleryView;
     private Button fromGalleryButton;
     private Button fromCameraButton;
+    private TextView usernameText;
+
+    private int maxBitmapSize;
 
     private String username;
     private String token;
@@ -48,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private File postDirectory;
     private String tmpCaptureName;
 
+    private ActivityResultLauncher<Intent> galleryActivityResultLauncher;
     private ActivityResultLauncher<Intent> cameraActivityResultLauncher;
     private SwipeRefreshLayout galleryRefreshLayout;
 
@@ -65,6 +72,11 @@ public class MainActivity extends AppCompatActivity {
         username = intentFromLogIn.getExtras().getString("username");
         token = "Bearer " + intentFromLogIn.getExtras().getString("token");
 
+        usernameText = findViewById(R.id.Username);
+        usernameText.setText(username);
+
+        maxBitmapSize = 800;
+
         userPosts = new ArrayList<UserPost>();
 
         galleryView = findViewById(R.id.GalleryView);
@@ -75,7 +87,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intentToDetailInfo = new Intent(view.getContext(), DetailInfoActivity.class);
-                intentToDetailInfo.putExtra("ID", i);
+                intentToDetailInfo.putExtra("Uploader", userPosts.get(i).getUsername());
+                intentToDetailInfo.putExtra("Artist", userPosts.get(i).getArtist());
+                intentToDetailInfo.putExtra("DateTime", userPosts.get(i).getUploadDateFormatted() + " " + userPosts.get(i).getUploadTimeFormatted());
+                intentToDetailInfo.putExtra("Caption", userPosts.get(i).getCaption());
+                intentToDetailInfo.putExtra("PhotoFilePath", userPosts.get(i).getLocalPhotoFile().getAbsolutePath());
                 startActivity(intentToDetailInfo);
             }
         });
@@ -92,7 +108,9 @@ public class MainActivity extends AppCompatActivity {
         fromGalleryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Intent galleryIntent = new Intent(Intent.ACTION_PICK);
+                galleryIntent.setType("image/*");
+                galleryActivityResultLauncher.launch(galleryIntent);
             }
         });
 
@@ -108,6 +126,54 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        galleryActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void onActivityResult(ActivityResult result) {
+                if (result.getResultCode() == RESULT_OK) {
+                    try {
+                        ExifInterface exifInterface = new ExifInterface(getContentResolver().openInputStream(result.getData().getData()));
+                        Bitmap capturedBitmap = photoRotateCropCenterResize(MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), result.getData().getData()), exifInterface);
+
+                        String artist = "";
+                        if (exifInterface.getAttribute(ExifInterface.TAG_ARTIST) != null) {
+                            artist = exifInterface.getAttribute(ExifInterface.TAG_ARTIST);
+                        }
+
+                        Calendar currentCalendar = Calendar.getInstance();
+                        int capturedYear = currentCalendar.get(Calendar.YEAR);
+                        int capturedMonth = currentCalendar.get(Calendar.MONTH) + 1;
+                        int capturedDay = currentCalendar.get(Calendar.DAY_OF_MONTH);
+                        int capturedHour = currentCalendar.get(Calendar.HOUR_OF_DAY);
+                        int capturedMinute = currentCalendar.get(Calendar.MINUTE);
+                        if (exifInterface.getAttribute(ExifInterface.TAG_DATETIME) != null) {
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+                            Calendar capturedCalendar = Calendar.getInstance();
+                            capturedCalendar.setTime(simpleDateFormat.parse(exifInterface.getAttribute(ExifInterface.TAG_DATETIME)));
+
+                            capturedYear = capturedCalendar.get(Calendar.YEAR);
+                            capturedMonth = capturedCalendar.get(Calendar.MONTH) + 1;
+                            capturedDay = capturedCalendar.get(Calendar.DAY_OF_MONTH);
+                            capturedHour = capturedCalendar.get(Calendar.HOUR_OF_DAY);
+                            capturedMinute = capturedCalendar.get(Calendar.MINUTE);
+                        }
+                        Log.d("CHECK DATETIME PARSED", String.format("%d/%d/%d %d:%d", capturedYear, capturedMonth, capturedDay, capturedHour, capturedMinute));
+
+                        String caption = "";
+                        if (exifInterface.getAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION) != null) {
+                            caption = exifInterface.getAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION);
+                        }
+
+                        UploadPostSerializer uploadPostSerializer = new UploadPostSerializer(username, artist, capturedBitmap, capturedYear, capturedMonth, capturedDay, capturedHour, capturedMinute, caption);
+                        sendPostToServer(uploadPostSerializer);
+                    } catch (IOException | ParseException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        });
+
         cameraActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
             @RequiresApi(api = Build.VERSION_CODES.Q)
             @Override
@@ -117,33 +183,15 @@ public class MainActivity extends AppCompatActivity {
                     if (!tmpCapturedFile.exists()) {
                         return;
                     }
-                    Bitmap capturedBitmap = BitmapFactory.decodeFile(tmpCapturedFile.getAbsolutePath());
 
-                    ExifInterface exifInterfaceToRotate = null;
+                    ExifInterface exifInterface = null;
                     try {
-                        exifInterfaceToRotate = new ExifInterface(tmpCapturedFile.getAbsoluteFile());
+                        exifInterface = new ExifInterface(tmpCapturedFile.getAbsolutePath());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    int exifInterfaceOrientation = exifInterfaceToRotate.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-                    int exifInterfaceOrientationDegree = 0;
-                    if (exifInterfaceOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
-                        exifInterfaceOrientationDegree = 90;
-                    } else if (exifInterfaceOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
-                        exifInterfaceOrientationDegree = 180;
-                    } else if (exifInterfaceOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
-                        exifInterfaceOrientationDegree = 270;
-                    }
 
-                    if (exifInterfaceOrientationDegree != 0) {
-                        Matrix bitmapRotationMatrix = new Matrix();
-                        bitmapRotationMatrix.setRotate(exifInterfaceOrientationDegree, (float) capturedBitmap.getWidth()/2, (float) capturedBitmap.getHeight()/2);
-                        Bitmap capturedBitmapOrigin = Bitmap.createBitmap(capturedBitmap, 0, 0, capturedBitmap.getWidth(), capturedBitmap.getHeight(), bitmapRotationMatrix, true);
-
-                        capturedBitmap.recycle();
-                        capturedBitmap = capturedBitmapOrigin;
-                    }
-
+                    Bitmap capturedBitmap = photoRotateCropCenterResize(BitmapFactory.decodeFile(tmpCapturedFile.getAbsolutePath()), exifInterface);
                     tmpCapturedFile.delete();
 
                     // capturedBitmap
@@ -155,23 +203,8 @@ public class MainActivity extends AppCompatActivity {
                     int capturedMinute = currentCalendar.get(Calendar.MINUTE);
                     String caption = "";
 
-                    UploadPostSerializer uploadPostSerializer = new UploadPostSerializer(username, capturedBitmap, capturedYear, capturedMonth, capturedDay, capturedHour, capturedMinute, caption);
-                    Call<UploadPostSerializer> uploadPostCall = LogInSignUpActivity.serverAPI.uploadPost(token, uploadPostSerializer); // using the same API as the previous activity
-                    uploadPostCall.enqueue(new Callback<UploadPostSerializer>() {
-                        @Override
-                        public void onResponse(Call<UploadPostSerializer> call, Response<UploadPostSerializer> response) {
-                            if (response.isSuccessful()) {
-                                Toast.makeText(MainActivity.this, "Uploaded Successfully!", Toast.LENGTH_LONG);
-                            } else {
-                                Toast.makeText(MainActivity.this, "Failed to Upload!", Toast.LENGTH_SHORT);
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<UploadPostSerializer> call, Throwable t) {
-
-                        }
-                    });
+                    UploadPostSerializer uploadPostSerializer = new UploadPostSerializer(username, "", capturedBitmap, capturedYear, capturedMonth, capturedDay, capturedHour, capturedMinute, caption);
+                    sendPostToServer(uploadPostSerializer);
                 }
             }
         });
@@ -209,22 +242,20 @@ public class MainActivity extends AppCompatActivity {
                     ArrayList<PostSerializer> posts = fetchGetResponse.getPosts();
                     for (PostSerializer post : posts) {
                         int id = post.getId();
+                        String artist = post.getArtist();
                         String photoURL = post.getPhoto();
                         String uploadDataFormatted = post.getDate();
                         String uploadTimeFormatted = post.getTime();
                         String caption = post.getCaption();
-                        ArrayList<String> namesOfHeartUsers = post.getNamesOfHeartUsers();
 
-                        UserPost userPost = new UserPost(username, id, photoURL, uploadDataFormatted, uploadTimeFormatted, namesOfHeartUsers);
+                        UserPost userPost = new UserPost(id, username, artist, photoURL, uploadDataFormatted, uploadTimeFormatted, caption);
                         userPosts.add(userPost);
 
                         Log.d("POST ID", String.valueOf(id));
+                        Log.d("artist", artist);
                         Log.d("PHOTO URL TO FETCH", photoURL);
                         Log.d("POST DATETIME", uploadDataFormatted + " " + uploadTimeFormatted);
                         Log.d("POST CAPTION", caption);
-                        for (String otherUsername : namesOfHeartUsers) {
-                            Log.d("NAME OF HEART USER", otherUsername);
-                        }
 
                         numToFetch++;
                     }
@@ -234,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
                         currPost.loadPhotoOnLocal(postDirectory.getAbsolutePath(), LogInSignUpActivity.requestServerURL);
                     }
                 } else {
-                    Toast.makeText(MainActivity.this, "Failed to fetch posts from server!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Failed to Fetch Posts!", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -273,5 +304,75 @@ public class MainActivity extends AppCompatActivity {
                 });
             }).start();
         }
+    }
+
+    public Bitmap photoRotateCropCenterResize(Bitmap capturedBitmap, ExifInterface exifInterface) {
+        int exifInterfaceOrientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+        int exifInterfaceOrientationDegree = 0;
+
+        if (exifInterfaceOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
+            exifInterfaceOrientationDegree = 90;
+        } else if (exifInterfaceOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
+            exifInterfaceOrientationDegree = 180;
+        } else if (exifInterfaceOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
+            exifInterfaceOrientationDegree = 270;
+        }
+
+        if (exifInterfaceOrientationDegree != 0) {
+            Matrix bitmapRotationMatrix = new Matrix();
+            bitmapRotationMatrix.setRotate(exifInterfaceOrientationDegree, (float) capturedBitmap.getWidth()/2, (float) capturedBitmap.getHeight()/2);
+            Bitmap capturedBitmapOrigin = Bitmap.createBitmap(capturedBitmap, 0, 0, capturedBitmap.getWidth(), capturedBitmap.getHeight(), bitmapRotationMatrix, true);
+
+            capturedBitmap.recycle();
+            capturedBitmap = capturedBitmapOrigin;
+        }
+
+        // Crop Center
+        int capturedBitmapWidth = capturedBitmap.getWidth();
+        int capturedBitmapHeight = capturedBitmap.getHeight();
+        if (capturedBitmapWidth > capturedBitmapHeight) {
+            Bitmap croppedBitmap = Bitmap.createBitmap(capturedBitmap, Math.floorDiv(capturedBitmapWidth - capturedBitmapHeight, 2), 0, capturedBitmapHeight, capturedBitmapHeight);
+
+            capturedBitmap.recycle();
+            capturedBitmap = croppedBitmap;
+        } else {
+            Bitmap croppedBitmap = Bitmap.createBitmap(capturedBitmap, 0, Math.floorDiv(capturedBitmapHeight - capturedBitmapWidth, 2), capturedBitmapWidth, capturedBitmapWidth);
+
+            capturedBitmap.recycle();
+            capturedBitmap = croppedBitmap;
+        }
+
+        // Resize Bitmap for efficiency
+        int currentBitmapSize = Math.min(capturedBitmap.getWidth(), capturedBitmap.getHeight());
+        while (currentBitmapSize > maxBitmapSize) {
+            currentBitmapSize /= 2;
+        }
+        Bitmap resizedBitmap = Bitmap.createScaledBitmap(capturedBitmap, currentBitmapSize, currentBitmapSize, true);
+
+        capturedBitmap.recycle();
+        capturedBitmap = resizedBitmap;
+
+        return capturedBitmap;
+    }
+
+    public void sendPostToServer(UploadPostSerializer uploadPostSerializer) {
+        Call<UploadPostSerializer> uploadPostCall = LogInSignUpActivity.serverAPI.uploadPost(token, uploadPostSerializer); // using the same API as the previous activity
+        uploadPostCall.enqueue(new Callback<UploadPostSerializer>() {
+            @Override
+            public void onResponse(Call<UploadPostSerializer> call, Response<UploadPostSerializer> response) {
+                if (response.isSuccessful()) {
+                    galleryRefreshLayout.setRefreshing(true);
+                    galleryReload();
+                    Toast.makeText(MainActivity.this, "Uploaded Successfully!", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Failed to Upload!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UploadPostSerializer> call, Throwable t) {
+
+            }
+        });
     }
 }

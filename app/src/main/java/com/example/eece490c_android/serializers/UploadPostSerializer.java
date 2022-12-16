@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 
 public class UploadPostSerializer {
     private String username;
+    private String artist;
     private String photo;
     private int captured_year;
     private int captured_month;
@@ -15,8 +16,9 @@ public class UploadPostSerializer {
     private int captured_minute;
     private String caption;
 
-    public UploadPostSerializer(String username, Bitmap photo, int capturedYear, int capturedMonth, int capturedDay, int capturedHour, int capturedMinute, String caption) {
+    public UploadPostSerializer(String username, String artist, Bitmap photo, int capturedYear, int capturedMonth, int capturedDay, int capturedHour, int capturedMinute, String caption) {
         this.username = username;
+        this.artist = artist;
         this.captured_year = capturedYear;
         this.captured_month = capturedMonth;
         this.captured_day = capturedDay;
