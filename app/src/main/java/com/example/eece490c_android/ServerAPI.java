@@ -22,6 +22,9 @@ public interface ServerAPI {
     @POST("photo_server/upload/")
     Call<UploadPostSerializer> uploadPost(@Header("Authorization") String token, @Body UploadPostSerializer uploadPostSerializer);
 
+    @POST("photo_server/delete/")
+    Call<Integer> deletePost(@Header("Authorization") String token, @Body Integer postId);
+
     @GET("photo_server/fetch/")
     Call<FetchPostsSerializer> fetchGet(@Header("Authorization") String token, @Query("username") String username);
 }

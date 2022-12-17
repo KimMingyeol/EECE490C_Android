@@ -1,11 +1,15 @@
 package com.example.eece490c_android;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.eece490c_android.serializers.LogInSerializer;
@@ -59,6 +63,16 @@ public class LogInSignUpActivity extends AppCompatActivity {
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private void initialPermissionRequest() {
+        int permissionCamera = checkSelfPermission(Manifest.permission.CAMERA);
+        int permissionReadExternalStorage = checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
+
+        if (permissionCamera == PackageManager.PERMISSION_DENIED || permissionReadExternalStorage == PackageManager.PERMISSION_DENIED) {
+            requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE}, 1000);
+        }
+    }
+
     private void logIn() {
         String username = checkAndExtractUsernameInputField();
         String password = checkAndExtractPasswordInputField();
@@ -74,7 +88,7 @@ public class LogInSignUpActivity extends AppCompatActivity {
                     String token = logInResponse.getToken();
 
                     intentToGallery.putExtra("username", username);
-                    intentToGallery.putExtra("token", token);
+                    intentToGallery.putExtra("token", "Bearer " + token);
 
                     startActivity(intentToGallery);
                 } else {

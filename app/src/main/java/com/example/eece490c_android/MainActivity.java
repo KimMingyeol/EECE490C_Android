@@ -68,9 +68,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Intent intentFromLogIn = getIntent();
-        username = intentFromLogIn.getExtras().getString("username");
-        token = "Bearer " + intentFromLogIn.getExtras().getString("token");
+        Intent intentFromLogInOrDetailInfo = getIntent();
+        username = intentFromLogInOrDetailInfo.getExtras().getString("username");
+        token = intentFromLogInOrDetailInfo.getExtras().getString("token");
 
         usernameText = findViewById(R.id.Username);
         usernameText.setText(username);
@@ -92,6 +92,9 @@ public class MainActivity extends AppCompatActivity {
                 intentToDetailInfo.putExtra("DateTime", userPosts.get(i).getUploadDateFormatted() + " " + userPosts.get(i).getUploadTimeFormatted());
                 intentToDetailInfo.putExtra("Caption", userPosts.get(i).getCaption());
                 intentToDetailInfo.putExtra("PhotoFilePath", userPosts.get(i).getLocalPhotoFile().getAbsolutePath());
+                intentToDetailInfo.putExtra("postId", userPosts.get(i).getId());
+                intentToDetailInfo.putExtra("username", username);
+                intentToDetailInfo.putExtra("token", token);
                 startActivity(intentToDetailInfo);
             }
         });
