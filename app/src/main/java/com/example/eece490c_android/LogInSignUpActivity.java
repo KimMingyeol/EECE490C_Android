@@ -52,7 +52,7 @@ public class LogInSignUpActivity extends AppCompatActivity {
         usernameInput = findViewById(R.id.UsernameInput);
         passwordInput = findViewById(R.id.PasswordInput);
 
-        requestServerURL = "https://27d4-141-223-65-49.ngrok.io/";
+        requestServerURL = "https://478b-2001-2d8-6726-5dbd-c896-d8de-5af4-6961.ngrok.io/";
         Retrofit retrofit = new Retrofit.Builder().baseUrl(requestServerURL).addConverterFactory(GsonConverterFactory.create()).build();
         serverAPI = retrofit.create(ServerAPI.class);
 
@@ -142,7 +142,7 @@ public class LogInSignUpActivity extends AppCompatActivity {
                     if (response.code() == 409) {
                         Toast.makeText(LogInSignUpActivity.this, "Account Already Exists!", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(LogInSignUpActivity.this, "Invalid Sign Up Request!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LogInSignUpActivity.this, "Invalid Sign Up Form!", Toast.LENGTH_SHORT).show();
                     }
                 }
             }

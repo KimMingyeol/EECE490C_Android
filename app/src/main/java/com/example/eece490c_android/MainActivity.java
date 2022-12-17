@@ -149,6 +149,7 @@ public class MainActivity extends AppCompatActivity {
                         int capturedDay = currentCalendar.get(Calendar.DAY_OF_MONTH);
                         int capturedHour = currentCalendar.get(Calendar.HOUR_OF_DAY);
                         int capturedMinute = currentCalendar.get(Calendar.MINUTE);
+                        int capturedSecond = currentCalendar.get(Calendar.SECOND);
                         if (exifInterface.getAttribute(ExifInterface.TAG_DATETIME) != null) {
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
                             Calendar capturedCalendar = Calendar.getInstance();
@@ -159,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
                             capturedDay = capturedCalendar.get(Calendar.DAY_OF_MONTH);
                             capturedHour = capturedCalendar.get(Calendar.HOUR_OF_DAY);
                             capturedMinute = capturedCalendar.get(Calendar.MINUTE);
+                            capturedSecond = capturedCalendar.get(Calendar.SECOND);
                         }
                         Log.d("CHECK DATETIME PARSED", String.format("%d/%d/%d %d:%d", capturedYear, capturedMonth, capturedDay, capturedHour, capturedMinute));
 
@@ -167,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
                             caption = exifInterface.getAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION);
                         }
 
-                        UploadPostSerializer uploadPostSerializer = new UploadPostSerializer(username, artist, capturedBitmap, capturedYear, capturedMonth, capturedDay, capturedHour, capturedMinute, caption);
+                        UploadPostSerializer uploadPostSerializer = new UploadPostSerializer(username, artist, capturedBitmap, capturedYear, capturedMonth, capturedDay, capturedHour, capturedMinute, capturedSecond, caption);
                         sendPostToServer(uploadPostSerializer);
                     } catch (IOException | ParseException e) {
                         e.printStackTrace();
@@ -204,9 +206,10 @@ public class MainActivity extends AppCompatActivity {
                     int capturedDay = currentCalendar.get(Calendar.DAY_OF_MONTH);
                     int capturedHour = currentCalendar.get(Calendar.HOUR_OF_DAY);
                     int capturedMinute = currentCalendar.get(Calendar.MINUTE);
+                    int capturedSecond = currentCalendar.get(Calendar.SECOND);
                     String caption = "";
 
-                    UploadPostSerializer uploadPostSerializer = new UploadPostSerializer(username, "", capturedBitmap, capturedYear, capturedMonth, capturedDay, capturedHour, capturedMinute, caption);
+                    UploadPostSerializer uploadPostSerializer = new UploadPostSerializer(username, "", capturedBitmap, capturedYear, capturedMonth, capturedDay, capturedHour, capturedMinute, capturedSecond, caption);
                     sendPostToServer(uploadPostSerializer);
                 }
             }
@@ -291,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
             new Thread(() -> {
                 Log.d("BEFORE WHILE LOOP", "START WAITING");
                 while(numOfFetched < numToFetch) {
-                    Log.d("WHILE LOOP", "WAITING TO FETCH " + String.valueOf(numToFetch));
+                    Log.d("WHILE LOOP", "WAITING TO FETCH " + String.valueOf(numOfFetched)  + " < "+ String.valueOf(numToFetch));
                 }
                 runOnUiThread(new Runnable() {
                     @Override
@@ -326,21 +329,23 @@ public class MainActivity extends AppCompatActivity {
             bitmapRotationMatrix.setRotate(exifInterfaceOrientationDegree, (float) capturedBitmap.getWidth()/2, (float) capturedBitmap.getHeight()/2);
             Bitmap capturedBitmapOrigin = Bitmap.createBitmap(capturedBitmap, 0, 0, capturedBitmap.getWidth(), capturedBitmap.getHeight(), bitmapRotationMatrix, true);
 
-            capturedBitmap.recycle();
-            capturedBitmap = capturedBitmapOrigin;
+            if (capturedBitmap != capturedBitmapOrigin) {
+                capturedBitmap.recycle();
+                capturedBitmap = capturedBitmapOrigin;
+            }
         }
 
         // Crop Center
         int capturedBitmapWidth = capturedBitmap.getWidth();
         int capturedBitmapHeight = capturedBitmap.getHeight();
+        Bitmap croppedBitmap;
         if (capturedBitmapWidth > capturedBitmapHeight) {
-            Bitmap croppedBitmap = Bitmap.createBitmap(capturedBitmap, Math.floorDiv(capturedBitmapWidth - capturedBitmapHeight, 2), 0, capturedBitmapHeight, capturedBitmapHeight);
-
-            capturedBitmap.recycle();
-            capturedBitmap = croppedBitmap;
+            croppedBitmap = Bitmap.createBitmap(capturedBitmap, Math.floorDiv(capturedBitmapWidth - capturedBitmapHeight, 2), 0, capturedBitmapHeight, capturedBitmapHeight);
         } else {
-            Bitmap croppedBitmap = Bitmap.createBitmap(capturedBitmap, 0, Math.floorDiv(capturedBitmapHeight - capturedBitmapWidth, 2), capturedBitmapWidth, capturedBitmapWidth);
+            croppedBitmap = Bitmap.createBitmap(capturedBitmap, 0, Math.floorDiv(capturedBitmapHeight - capturedBitmapWidth, 2), capturedBitmapWidth, capturedBitmapWidth);
+        }
 
+        if (capturedBitmap != croppedBitmap) {
             capturedBitmap.recycle();
             capturedBitmap = croppedBitmap;
         }
@@ -352,8 +357,10 @@ public class MainActivity extends AppCompatActivity {
         }
         Bitmap resizedBitmap = Bitmap.createScaledBitmap(capturedBitmap, currentBitmapSize, currentBitmapSize, true);
 
-        capturedBitmap.recycle();
-        capturedBitmap = resizedBitmap;
+        if (capturedBitmap != resizedBitmap) {
+            capturedBitmap.recycle();
+            capturedBitmap = resizedBitmap;
+        }
 
         return capturedBitmap;
     }
@@ -366,7 +373,6 @@ public class MainActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     galleryRefreshLayout.setRefreshing(true);
                     galleryReload();
-                    Toast.makeText(MainActivity.this, "Uploaded Successfully!", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(MainActivity.this, "Failed to Upload!", Toast.LENGTH_SHORT).show();
                 }

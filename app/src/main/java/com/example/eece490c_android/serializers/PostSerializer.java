@@ -15,6 +15,7 @@ public class PostSerializer {
     private int captured_day;
     private int captured_hour;
     private int captured_minute;
+    private int captured_second;
     private String caption;
 
     public int getId() {
@@ -30,7 +31,7 @@ public class PostSerializer {
     }
 
     public String getTime() {
-        return String.format("%d:%d", captured_hour, captured_minute);
+        return String.format("%d:%d:%d", captured_hour, captured_minute, captured_second);
     }
 
     public String getCaption() {
