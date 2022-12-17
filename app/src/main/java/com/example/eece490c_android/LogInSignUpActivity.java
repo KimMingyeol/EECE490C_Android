@@ -1,19 +1,24 @@
 package com.example.eece490c_android;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.eece490c_android.serializers.LogInSerializer;
 import com.example.eece490c_android.serializers.SignUpSerializer;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 
 import retrofit2.Call;
@@ -32,10 +37,13 @@ public class LogInSignUpActivity extends AppCompatActivity {
 
     private Intent intentToGallery;
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_signup);
+
+        initialPermissionRequest();
 
         intentToGallery = new Intent(this, MainActivity.class);
 
@@ -68,8 +76,22 @@ public class LogInSignUpActivity extends AppCompatActivity {
         int permissionCamera = checkSelfPermission(Manifest.permission.CAMERA);
         int permissionReadExternalStorage = checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
 
-        if (permissionCamera == PackageManager.PERMISSION_DENIED || permissionReadExternalStorage == PackageManager.PERMISSION_DENIED) {
-            requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE}, 1000);
+        if (permissionCamera != PackageManager.PERMISSION_GRANTED || permissionReadExternalStorage != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        boolean permissionGrantedState = requestCode == 0 && permissions.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED;
+        if (!permissionGrantedState) {
+            new AlertDialog.Builder(this).setTitle("Virtual Gallery").setMessage("Permission required for running this application :(").setPositiveButton("QUIT", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    finish();
+                }
+            }).show();
         }
     }
 
