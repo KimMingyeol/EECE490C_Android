@@ -17,7 +17,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class DetailInfoActivity extends AppCompatActivity {
-    private TextView uploaderText;
     private TextView artistText;
     private TextView dateTimeText;
     private TextView captionText;
@@ -36,7 +35,6 @@ public class DetailInfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail_info);
 
         Intent intentFromGallery = getIntent();
-        String uploader = intentFromGallery.getExtras().getString("Uploader");
         String artist = intentFromGallery.getExtras().getString("Artist");
         String dateTime = intentFromGallery.getExtras().getString("DateTime");
         String caption = intentFromGallery.getExtras().getString("Caption");
@@ -45,14 +43,16 @@ public class DetailInfoActivity extends AppCompatActivity {
         username = intentFromGallery.getExtras().getString("username");
         token = intentFromGallery.getExtras().getString("token");
 
-        uploaderText = findViewById(R.id.Uploader);
         artistText = findViewById(R.id.Artist);
         dateTimeText = findViewById(R.id.DateTime);
         captionText = findViewById(R.id.Caption);
         photoView = findViewById(R.id.PhotoView);
 
-        uploaderText.setText(uploader);
-        artistText.setText(artist);
+        if (artist.length() > 0) {
+            artistText.setText(artist);
+        } else {
+            artistText.setText(username);
+        }
         dateTimeText.setText(dateTime);
         captionText.setText(caption);
         photoView.setImageBitmap(BitmapFactory.decodeFile(photoViewFilePath));

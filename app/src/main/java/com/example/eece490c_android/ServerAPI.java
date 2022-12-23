@@ -26,5 +26,5 @@ public interface ServerAPI {
     Call<Integer> deletePost(@Header("Authorization") String token, @Body Integer postId);
 
     @GET("photo_server/fetch/")
-    Call<FetchPostsSerializer> fetchGet(@Header("Authorization") String token, @Query("username") String username);
+    Call<FetchPostsSerializer> fetchGet(@Header("Authorization") String token, @Query("username") String username, @Query("from_which") String from_which);
 }

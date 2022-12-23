@@ -12,16 +12,29 @@
         android:orientation="vertical"
         tools:ignore="MissingConstraints">
 
-        <TextView
-            android:id="@+id/AppTitleText"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="15dp"
-            android:paddingTop="15dp"
-            android:paddingBottom="5dp"
-            android:text="Virtual Gallery"
-            android:textSize = "30dp"
-            android:textStyle= "bold"/>
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/AppTitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="15dp"
+                android:paddingTop="15dp"
+                android:paddingBottom="5dp"
+                android:paddingRight="5dp"
+                android:text="SCVGA"
+                android:textSize="30dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textView8"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="YOUR CUSTOMIZABLE VIRTUAL GALLERY" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/UserInfo"

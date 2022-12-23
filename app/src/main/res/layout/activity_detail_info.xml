@@ -67,36 +67,10 @@
                     android:paddingRight="10dp">
 
                     <TextView
-                        android:id="@+id/UploaderLabel"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Uploader   "
-                        android:textStyle="bold"
-                        android:textSize="20dp" />
-
-                    <TextView
-                        android:id="@+id/Uploader"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textSize="18dp" />
-
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:paddingTop="5dp"
-                    android:paddingBottom="5dp"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp">
-
-                    <TextView
                         android:id="@+id/ArtistLabel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Artist   "
+                        android:text="By.   "
                         android:textStyle="bold"
                         android:textSize="20dp" />
 

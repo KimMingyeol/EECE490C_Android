@@ -52,7 +52,7 @@ public class LogInSignUpActivity extends AppCompatActivity {
         usernameInput = findViewById(R.id.UsernameInput);
         passwordInput = findViewById(R.id.PasswordInput);
 
-        requestServerURL = "https://478b-2001-2d8-6726-5dbd-c896-d8de-5af4-6961.ngrok.io/";
+        requestServerURL = "http://35.247.113.204:8000/";
         Retrofit retrofit = new Retrofit.Builder().baseUrl(requestServerURL).addConverterFactory(GsonConverterFactory.create()).build();
         serverAPI = retrofit.create(ServerAPI.class);
 

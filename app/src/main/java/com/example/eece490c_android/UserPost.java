@@ -53,7 +53,12 @@ public class UserPost {
                 fileOutputStream.flush();
                 fileOutputStream.close();
 
+                while (MainActivity.numOfFetchedLock) {
+                    Log.d("numOfFetchedLock", "Waiting...");
+                }
+                MainActivity.numOfFetchedLock = true;
                 MainActivity.numOfFetched++;
+                MainActivity.numOfFetchedLock = false;
                 Log.d("STATE", "FINISHED");
             } catch (IOException e) {
                 e.printStackTrace();

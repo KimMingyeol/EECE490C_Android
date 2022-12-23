@@ -42,6 +42,8 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
     private GridView galleryView;
+    private GalleryAdapter galleryAdapter;
+
     private Button fromGalleryButton;
     private Button fromCameraButton;
     private TextView usernameText;
@@ -63,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
     private int numToFetch;
     private boolean isFetching;
 
+    public static boolean numOfFetchedLock = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,19 +84,19 @@ public class MainActivity extends AppCompatActivity {
         userPosts = new ArrayList<UserPost>();
 
         galleryView = findViewById(R.id.GalleryView);
-        galleryView.setAdapter(new GalleryAdapter(this));
+        galleryAdapter = new GalleryAdapter(galleryView.getContext());
+        galleryView.setAdapter(galleryAdapter);
         galleryRefreshLayout = findViewById(R.id.GallerySwipeLayout);
 
         galleryView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intentToDetailInfo = new Intent(view.getContext(), DetailInfoActivity.class);
-                intentToDetailInfo.putExtra("Uploader", userPosts.get(i).getUsername());
-                intentToDetailInfo.putExtra("Artist", userPosts.get(i).getArtist());
-                intentToDetailInfo.putExtra("DateTime", userPosts.get(i).getUploadDateFormatted() + " " + userPosts.get(i).getUploadTimeFormatted());
-                intentToDetailInfo.putExtra("Caption", userPosts.get(i).getCaption());
-                intentToDetailInfo.putExtra("PhotoFilePath", userPosts.get(i).getLocalPhotoFile().getAbsolutePath());
-                intentToDetailInfo.putExtra("postId", userPosts.get(i).getId());
+                intentToDetailInfo.putExtra("Artist", ((UserPost) galleryAdapter.getItem(i)).getArtist());
+                intentToDetailInfo.putExtra("DateTime", ((UserPost) galleryAdapter.getItem(i)).getUploadDateFormatted() + " " + ((UserPost) galleryAdapter.getItem(i)).getUploadTimeFormatted());
+                intentToDetailInfo.putExtra("Caption", ((UserPost) galleryAdapter.getItem(i)).getCaption());
+                intentToDetailInfo.putExtra("PhotoFilePath", ((UserPost) galleryAdapter.getItem(i)).getLocalPhotoFile().getAbsolutePath());
+                intentToDetailInfo.putExtra("postId", ((UserPost) galleryAdapter.getItem(i)).getId());
                 intentToDetailInfo.putExtra("username", username);
                 intentToDetailInfo.putExtra("token", token);
                 startActivity(intentToDetailInfo);
@@ -234,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
         if (username == null || token == null) {
             return false;
         }
-        Call<FetchPostsSerializer> fetchGetCall = LogInSignUpActivity.serverAPI.fetchGet(token, username);
+        Call<FetchPostsSerializer> fetchGetCall = LogInSignUpActivity.serverAPI.fetchGet(token, username, "android");
         fetchGetCall.enqueue(new Callback<FetchPostsSerializer>() {
             @Override
             public void onResponse(Call<FetchPostsSerializer> call, Response<FetchPostsSerializer> response) {
@@ -301,7 +305,8 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         Log.d("RELOAD GALLERY", "START");
                         galleryView.invalidateViews();
-                        galleryView.setAdapter(new GalleryAdapter(galleryView.getContext()));
+                        galleryAdapter = new GalleryAdapter(galleryView.getContext());
+                        galleryView.setAdapter(galleryAdapter);
 
                         Log.d("RELOAD SUCCESS", "OK");
                         galleryRefreshLayout.setRefreshing(false);
@@ -383,5 +388,10 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+//        super.onBackPressed();
     }
 }
